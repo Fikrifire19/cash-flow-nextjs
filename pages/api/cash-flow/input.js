@@ -8,7 +8,11 @@ export default async function handler(req, res) {
 
     const { tanggalTransaksi, kodeTransaksi, itemTransaksi, strukTransaksi, credit, debit } = req.body;
 
-    const saldo = credit - debit;
+    const allCredit = await db('cash_flow').sum('credit as c');
+    const allDebit = await db('cash_flow').sum('debit as d');
+
+    let saldo = allCredit[0].c - allDebit[0].d;
+
     const inputData = await db('cash_flow').insert({
         "tanggal-transaksi": tanggalTransaksi,
         "kode-transaksi": kodeTransaksi,
@@ -19,17 +23,6 @@ export default async function handler(req, res) {
         saldo
     });
 
-/*    const allCredit = await db('cash_flow').sum('credit');
-    const allDebit = await db('cash_flow').sum('debit');
-
-    const saldo = allCredit - allDebit;
-    const inputSaldo = await db('cash_flow').where('id', inputData).update({"tanggal-transaksi": tanggalTransaksi,
-    "kode-transaksi": kodeTransaksi,
-    "item-transaksi": itemTransaksi,
-    "struk-transaksi": strukTransaksi,
-    credit,
-    debit, saldo});
-*/
     const inputedData = await db('cash_flow').where('id', inputData).first();
 
     res.status(201);
